@@ -1,6 +1,6 @@
 from db.connection import get_connection
 
-def query_company_db(sql: str) -> list[dict]:
+def query_user_db(sql: str) -> list[dict]:
     sql_upper = sql.strip().upper()
     if not sql_upper.startswith("SELECT"):
         raise ValueError("Only SELECT statements are allowed.")

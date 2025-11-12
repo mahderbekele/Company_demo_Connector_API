@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Request, HTTPException
-from db.query_tool import query_company_db, query_admin_db
+from db.query_tool import query_user_db, query_admin_db
 import os
 from dotenv import load_dotenv
 import uvicorn
@@ -68,7 +68,7 @@ async def user_query(request: Request):
         raise HTTPException(status_code=400, detail="Missing SQL statement")
 
     try:
-        results = query_company_db(sql)
+        results = query_user_db(sql)
         return {"status": "success", "rows": len(results), "results": results, "role": role}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))

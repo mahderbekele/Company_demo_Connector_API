@@ -1,16 +1,21 @@
 openapi: 3.1.0
 info:
   title: Company Database Connector
-  description: Allows GPT to run safe, read-only SQL queries on the company schema of a PostgreSQL database.
+  description: >
+    Allows GPT to run safe, read-only SQL queries on the company and finance
+    schemas of a PostgreSQL database via authenticated endpoints.
   version: "1.0.0"
 servers:
-  - url: https://3a7dc6c6bc91.ngrok-free.app
+  - url: https://e7f4f5645351.ngrok-free.app
+
 paths:
-  /query:
+  /user/query:
     post:
       operationId: queryCompanyDB
-      summary: Run a read-only SQL query
-      description: Executes a SELECT query on the company schema in PostgreSQL using a read-only database role.
+      summary: Run a read-only SQL query as a standard user
+      description: >
+        Executes a SELECT query on the company schema in PostgreSQL using a
+        read-only user role. Requires a valid USER_API_KEY bearer token.
       requestBody:
         required: true
         content:
@@ -20,8 +25,8 @@ paths:
               properties:
                 sql:
                   type: string
-                  description: SQL SELECT query to execute (read-only, must include the company schema).
-                  example: "SELECT first_name, last_name, salary FROM company.employees WHERE salary > 100000;"
+                  description: SQL SELECT query to execute (must reference the company schema).
+                  example: "SELECT first_name, last_name FROM company.employees LIMIT 3;"
       responses:
         "200":
           description: Successful query
@@ -30,12 +35,65 @@ paths:
               schema:
                 type: object
                 properties:
-                  success:
-                    type: boolean
-                  data:
+                  status:
+                    type: string
+                    example: success
+                  rows:
+                    type: integer
+                  results:
                     type: array
                     items:
                       type: object
                       additionalProperties: true
+                  role:
+                    type: string
+                    example: user
         "400":
           description: Invalid SQL or server error
+        "403":
+          description: Invalid or missing user API key
+
+  /admin/query:
+    post:
+      operationId: queryAdminDB
+      summary: Run a read-only SQL query as an admin
+      description: >
+        Executes a SELECT query on the company or finance schemas in PostgreSQL
+        using the admin role. Requires a valid ADMIN_API_KEY bearer token.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                sql:
+                  type: string
+                  description: >
+                    SQL SELECT query to execute (can reference company or finance schemas).
+                  example: "SELECT * FROM finance.transactions LIMIT 5;"
+      responses:
+        "200":
+          description: Successful query
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  rows:
+                    type: integer
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: true
+                  role:
+                    type: string
+                    example: admin
+        "400":
+          description: Invalid SQL or server error
+        "403":
+          description: Invalid or missing admin API key

@@ -40,3 +40,6 @@ tools:
     entrypoint: db.query_tool:query_company_db
     permissions:
       - company_user
+
+
+
